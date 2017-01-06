@@ -1,0 +1,134 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html">
+<link rel="import" href="show-from-top-animation.html">
+<link rel="import" href="hide-on-top-animation.html">
+
+<!--
+`paper-search-hidable`
+Hidable search element
+
+@demo demo/index.html 
+-->
+
+<dom-module id="paper-search-hidable">
+  <template>
+    <style>
+      :host {
+        display: block;
+        width: 90%;
+        background-color: #FFF;
+        height: 50px;
+      }
+      paper-material {
+          height: 100%;
+      }
+      .table {
+          display: table;
+      }
+      .cell {
+          display: table-cell;
+      }
+      paper-input {
+          --paper-input-container-input: {
+              font-size: 20px;
+              height: 20px;
+              bottom: 20px;
+          };
+          --paper-input-container-underline: {
+              border-bottom: none;
+          };
+          --paper-input-container-underline-focus: {
+              border-bottom: none;
+          };
+      }
+      .menuIcon {
+          width:20%
+      }
+      .searchInput {
+          width:70%;
+      }
+    </style>
+    <paper-material elevation="2">
+        <div class="table">
+            <div class="cell menuIcon">
+                <paper-icon-button icon="menu" title="menu"></paper-icon-button>
+            </div>
+            <div class="cell searchInput">
+                <paper-input placeholder="Search"></paper-input>
+            </div>
+            <div class="cell">
+                <paper-icon-button icon="more-vert" title="more"></paper-icon-button>
+            </div>
+        </div>
+    </paper-material>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'paper-search-hidable',
+      behaviors: [Polymer.NeonAnimationRunnerBehavior],
+      properties: {
+        controlScroll: {
+            type: Number,
+            value: 0
+        },
+        scrollTop: {
+          type: Number,
+          observer: '_scrollHandler'
+        },
+        open: {
+            value: true
+        },
+        animationConfig: {
+            value: function() {
+                return {
+                    'displaySearch': {
+                        name: 'show-from-top-animation',
+                        node: this
+
+                    },
+                    'hideSearch': {
+                        name: 'hide-on-top-animation',
+                        node: this
+                    }
+                }
+            }
+        }
+      },
+      listeners: {
+          'neon-animation-finish': '_hideAnimationFinish'
+      },
+      _displaySearch: function(){
+          this.style.display = 'inline-block';
+          this.playAnimation('displaySearch');
+      },
+      _hideSearch: function(){
+          this.playAnimation('hideSearch');
+      },
+      _scrollHandler: function() {
+          
+          if(this.scrollTop > this.controlScroll && this.open) {
+              this.controlScroll = this.scrollTop;
+              this.open = false;
+              this._hideSearch();
+          }
+          if(this.scrollTop < this.controlScroll && !this.open) {
+              this.controlScroll = this.scrollTop;
+              this.open = true;
+              this._displaySearch();
+          }
+          
+          this.controlScroll =this.scrollTop;
+      },
+      _hideAnimationFinish: function() {
+          if(!this.open)
+             this.style.display = 'none';
+      }
+    });
+  </script>
+</dom-module>
